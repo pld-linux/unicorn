@@ -123,9 +123,13 @@ done
 %install
 rm -rf $RPM_BUILD_ROOT
 
+%if %{with userspace}
 %{__make} applis_install \
 	prefix=%{_prefix} \
 	DESTDIR=$RPM_BUILD_ROOT
+
+%find_lang bewan_adsl_status
+%endif
 
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
@@ -155,12 +159,11 @@ rm -rf $RPM_BUILD_ROOT
 %depmod %{_kernel_ver}smp
 
 %if %{with userspace}
-%files
+%files -f bewan_adsl_status.lang
 %defattr(644,root,root,755)
 %doc COPYING README scripts
 %attr(755,root,root) %{_bindir}/*
-/usr/share/bewan_adsl_status/pixmaps/*
-/usr/share/locale/*/LC_MESSAGES/*
+%{_datadir}/bewan_adsl_status
 %endif
 
 %if %{with kernel}
