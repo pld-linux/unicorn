@@ -1,10 +1,10 @@
 #
 # TODO
+# - optflags
 # - usb driver doesn't build
 # - pci dirver doesn't with 2.6.14.6 (skb_unlink changed in kernel)
 # - bewan_adsl_status is linked with gtk+, maybe subpackage
 # - rc-scripts support?
-# - descs
 #
 # Conditional build:
 %bcond_without	dist_kernel	# allow non-distribution kernel
@@ -15,7 +15,7 @@
 %bcond_with	usb		# build usb driver
 #
 Summary:	Unicorn ADSL modem software
-Summary(pl):	-
+Summary(pl):	Oprogramowanie do modemów ADSL Unicorn
 Name:		unicorn
 Version:	0.9.0
 Release:	0.1
@@ -31,28 +31,31 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Unicorn ADSL modem tools.
 
 %description -l pl
+Narzêdzia do modemów ADSL Unicorn.
 
 %package -n kernel-net-%{name}
-Summary:	Unicorn ADSL modem drivers.
-Summary(pl):	-
+Summary:	Unicorn ADSL modem drivers for Linux kernel
+Summary(pl):	Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa
 Group:		Base/Kernel
 Requires:	%{name} = %{version}-%{release}
 
 %description -n kernel-net-%{name}
-Unicorn ADSL modem drivers.
+Unicorn ADSL modem drivers for Linux kernel.
 
 %description -n kernel-net-%{name} -l pl
+Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa.
 
 %package -n kernel-smp-net-%{name}
-Summary:	Unicorn ADSL modem drivers.
-Summary(pl):	-
+Summary:	Unicorn ADSL modem drivers for Linux SMP kernel
+Summary(pl):	Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa SMP
 Group:		Base/Kernel
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description -n kernel-smp-net-%{name}
-Unicorn ADSL modem drivers.
+Unicorn ADSL modem drivers for Linux SMP kernel.
 
 %description -n kernel-smp-net-%{name} -l pl
+Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa SMP.
 
 %prep
 %setup -q -n %{name}
@@ -151,7 +154,6 @@ rm -rf $RPM_BUILD_ROOT
 %postun -n kernel-smp-net-%{name}
 %depmod %{_kernel_ver}smp
 
-
 %if %{with userspace}
 %files
 %defattr(644,root,root,755)
@@ -163,10 +165,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{with kernel}
 %files -n kernel-net-%{name}
-%attr(644,root,root) /lib/modules/%{_kernel_ver}/misc/*
+%defattr(644,root,root,755)
+/lib/modules/%{_kernel_ver}/misc/*
 
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-net-%{name}
-%attr(644,root,root) /lib/modules/%{_kernel_ver}smp/misc/*
+%defattr(644,root,root,755)
+/lib/modules/%{_kernel_ver}smp/misc/*
 %endif
 %endif
