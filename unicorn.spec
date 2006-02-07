@@ -18,7 +18,8 @@ Summary:	Unicorn ADSL modem software
 Summary(pl):	Oprogramowanie do modemów ADSL Unicorn
 Name:		unicorn
 Version:	0.9.0
-Release:	0.1
+%define	_rel	0.1
+Release:	%{_rel}
 License:	GPL v2
 Group:		Base/Kernel
 Source0:	http://www.bewan.com/bewan/drivers/bast-%{version}.tgz
@@ -36,8 +37,10 @@ Narzêdzia do modemów ADSL Unicorn.
 %package -n kernel-net-%{name}
 Summary:	Unicorn ADSL modem drivers for Linux kernel
 Summary(pl):	Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa
+Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-Requires:	%{name} = %{version}-%{release}
+Requires(post,postun):	/sbin/depmod
+Requires:	%{name} = %{version}-%{_rel}
 
 %description -n kernel-net-%{name}
 Unicorn ADSL modem drivers for Linux kernel.
@@ -48,8 +51,10 @@ Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa.
 %package -n kernel-smp-net-%{name}
 Summary:	Unicorn ADSL modem drivers for Linux SMP kernel
 Summary(pl):	Sterowniki do modemów ADSL Unicorn dla j±dra Linuksa SMP
+Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-Requires:	%{name}-devel = %{version}-%{release}
+Requires(post,postun):	/sbin/depmod
+Requires:	%{name}-devel = %{version}-%{_rel}
 
 %description -n kernel-smp-net-%{name}
 Unicorn ADSL modem drivers for Linux SMP kernel.
