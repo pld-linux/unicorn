@@ -15,7 +15,7 @@
 %bcond_with	usb		# build usb driver
 #
 Summary:	Unicorn ADSL modem software
-Summary(pl.UTF-8):   Oprogramowanie do modemów ADSL Unicorn
+Summary(pl.UTF-8):	Oprogramowanie do modemów ADSL Unicorn
 Name:		unicorn
 Version:	0.9.0
 %define	_rel	0.1
@@ -36,7 +36,7 @@ Narzędzia do modemów ADSL Unicorn.
 
 %package -n kernel-net-%{name}
 Summary:	Unicorn ADSL modem drivers for Linux kernel
-Summary(pl.UTF-8):   Sterowniki do modemów ADSL Unicorn dla jądra Linuksa
+Summary(pl.UTF-8):	Sterowniki do modemów ADSL Unicorn dla jądra Linuksa
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 Requires(post,postun):	/sbin/depmod
@@ -50,7 +50,7 @@ Sterowniki do modemów ADSL Unicorn dla jądra Linuksa.
 
 %package -n kernel-smp-net-%{name}
 Summary:	Unicorn ADSL modem drivers for Linux SMP kernel
-Summary(pl.UTF-8):   Sterowniki do modemów ADSL Unicorn dla jądra Linuksa SMP
+Summary(pl.UTF-8):	Sterowniki do modemów ADSL Unicorn dla jądra Linuksa SMP
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 Requires(post,postun):	/sbin/depmod
