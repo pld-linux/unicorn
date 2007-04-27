@@ -1,8 +1,6 @@
 #
 # TODO
 # - optflags
-# - usb driver doesn't build
-# - pci dirver doesn't with 2.6.14.6 (skb_unlink changed in kernel)
 # - bewan_adsl_status is linked with gtk+, maybe subpackage
 # - rc-scripts support?
 #
@@ -17,13 +15,13 @@
 Summary:	Unicorn ADSL modem software
 Summary(pl.UTF-8):	Oprogramowanie do modemów ADSL Unicorn
 Name:		unicorn
-Version:	0.9.0
+Version:	0.9.3
 %define	_rel	0.1
 Release:	%{_rel}
 License:	GPL v2
 Group:		Base/Kernel
-Source0:	http://www.bewan.com/bewan/drivers/bast-%{version}.tgz
-# Source0-md5:	8b4f880e79d9d23029cc8f85e2f6478a
+Source0:	http://www.bewan.com/bewan/drivers/A1012-A1006-A904-A888-A983-%{version}.tgz
+# Source0-md5:	ff9829f03168279a079d05aea780ee99
 URL:		http://www.bewan.com/
 BuildRequires:	gtk+-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -78,22 +76,32 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
 		exit 1
 	fi
-	rm -rf include
-	install -d include/{linux,config}
-	ln -sf %{_kernelsrcdir}/config-$cfg .config
-	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
-	ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
-	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg Module.symvers
-	touch include/config/MARKER
+	install -d o/include/linux
+	ln -sf %{_kernelsrcdir}/config-$cfg o/.config
+	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg o/Module.symvers
+	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h o/include/linux/autoconf.h
+%if %{with dist_kernel}
+	%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
+%else
+	install -d o/include/config
+	touch o/include/config/MARKER
+	ln -sf %{_kernelsrcdir}/scripts o/scripts
+%endif
 	%{__make} -C %{_kernelsrcdir} clean \
-		RCS_FIND_IGNORE="-name '*.ko' -o" \
-		M=$PWD O=$PWD \
+		KERNEL_SOURCES="$PWD/o" \
+		RCS_FIND_IGNORE="-name '*.ko' -o -name nv-kernel.o -o" \
+		SYSSRC=%{_kernelsrcdir} \
+		SYSOUT=$PWD/o \
+		M=$PWD O=$PWD/o \
 		%{?with_verbose:V=1}
 	%{__make} -C %{_kernelsrcdir} modules \
-		HOSTCC="%{__cc}" \
-		CPP="%{__cpp}" \
-		M=$PWD O=$PWD \
+		KERNEL_SOURCES="$PWD/o" \
+		CC="%{__cc}" CPP="%{__cpp}" \
+		SYSSRC=%{_kernelsrcdir} \
+		SYSOUT=$PWD/o \
+		M=$PWD O=$PWD/o \
 		%{?with_verbose:V=1}
+
 	mv unicorn_pci_atm{,-$cfg}.ko
 	mv unicorn_pci_eth{,-$cfg}.ko
 done
@@ -104,23 +112,31 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
 		exit 1
 	fi
-	rm -rf include
-	install -d include/{linux,config}
-	ln -sf %{_kernelsrcdir}/config-$cfg .config
-	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
-	ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
-	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg Module.symvers
-	touch include/config/MARKER
+	install -d o/include/linux
+	ln -sf %{_kernelsrcdir}/config-$cfg o/.config
+	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg o/Module.symvers
+	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h o/include/linux/autoconf.h
+%if %{with dist_kernel}
+	%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
+%else
+	install -d o/include/config
+	touch o/include/config/MARKER
+	ln -sf %{_kernelsrcdir}/scripts o/scripts
+%endif
 	%{__make} -C %{_kernelsrcdir} clean \
-		RCS_FIND_IGNORE="-name '*.ko' -o" \
-		M=$PWD O=$PWD \
+		RCS_FIND_IGNORE="-name '*.ko' -o -name nv-kernel.o -o" \
+		SYSSRC=%{_kernelsrcdir} \
+		SYSOUT=$PWD/o \
+		M=$PWD O=$PWD/o \
 		%{?with_verbose:V=1}
 	%{__make} -C %{_kernelsrcdir} modules \
-		HOSTCC="%{__cc}" \
-		CPP="%{__cpp}" \
-		M=$PWD O=$PWD \
+		CC="%{__cc}" CPP="%{__cpp}" \
+		SYSSRC=%{_kernelsrcdir} \
+		SYSOUT=$PWD/o \
+		M=$PWD O=$PWD/o \
 		%{?with_verbose:V=1}
-#	mv unicorn_usb{,-$cfg}.ko
+	mv unicorn_usb_atm{,-$cfg}.ko
+	mv unicorn_usb_eth{,-$cfg}.ko
 done
 %endif
 %endif
@@ -141,9 +157,17 @@ install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 for mods in atm eth ; do
 install unicorn_pci/unicorn_pci_$mods-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
 	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/unicorn_pci_$mods.ko
+%if %{with usb}
+install unicorn_usb/unicorn_usb_$mods-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/unicorn_usb_$mods.ko
+%endif
 %if %{with smp} && %{with dist_kernel}
 install unicorn_pci/unicorn_pci_$mods-smp.ko \
 	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/unicorn_pci_$mods.ko
+%if %{with usb}
+install unicorn_usb/unicorn_usb_$mods-smp.ko \
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/unicorn_usb_$mods.ko
+%endif
 %endif
 done
 %endif
