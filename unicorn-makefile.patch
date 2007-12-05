@@ -1,0 +1,12 @@
+diff -ur unicorn.orig/unicorn_pci/Makefile unicorn/unicorn_pci/Makefile
+--- unicorn.orig/unicorn_pci/Makefile	2006-01-03 13:54:39.000000000 +0000
++++ unicorn/unicorn_pci/Makefile	2007-12-05 16:12:38.000000000 +0000
+@@ -28,7 +28,7 @@
+ MODDIR=$(PWD)
+ endif
+ 
+-include $(KERNEL_SOURCES)/.config
++#include $(KERNEL_SOURCES)/.config
+ 
+ #
+ # -DUSE_HW_TIMER - set this to use 2ms PCI hardware timer
