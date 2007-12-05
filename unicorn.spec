@@ -23,6 +23,8 @@ Group:		Base/Kernel
 Source0:	http://www.bewan.com/bewan/drivers/A1012-A1006-A904-A888-A983-%{version}.tgz
 # Source0-md5:	ff9829f03168279a079d05aea780ee99
 URL:		http://www.bewan.com/
+%{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.22}
+BuildRequires:	rpmbuild(macros) >= 1.379
 BuildRequires:	gtk+-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -32,33 +34,21 @@ Unicorn ADSL modem tools.
 %description -l pl.UTF-8
 Narzędzia do modemów ADSL Unicorn.
 
-%package -n kernel-net-%{name}
+%package -n kernel%{_alt_kernel}-net-%{name}
 Summary:	Unicorn ADSL modem drivers for Linux kernel
 Summary(pl.UTF-8):	Sterowniki do modemów ADSL Unicorn dla jądra Linuksa
 Release:	%{_rel}@%{_kernel_ver_str}
+Provides:	%{name}
+%{?with_dist_kernel:%requires_releq_kernel}
 Group:		Base/Kernel
 Requires(post,postun):	/sbin/depmod
-Requires:	%{name} = %{version}-%{_rel}
+Requires:	module-init-tools >= 3.2.2-2
 
-%description -n kernel-net-%{name}
+%description -n kernel%{_alt_kernel}-net-%{name}
 Unicorn ADSL modem drivers for Linux kernel.
 
-%description -n kernel-net-%{name} -l pl.UTF-8
+%description -n kernel%{_alt_kernel}-net-%{name} -l pl.UTF-8
 Sterowniki do modemów ADSL Unicorn dla jądra Linuksa.
-
-%package -n kernel-smp-net-%{name}
-Summary:	Unicorn ADSL modem drivers for Linux SMP kernel
-Summary(pl.UTF-8):	Sterowniki do modemów ADSL Unicorn dla jądra Linuksa SMP
-Release:	%{_rel}@%{_kernel_ver_str}
-Group:		Base/Kernel
-Requires(post,postun):	/sbin/depmod
-Requires:	%{name}-devel = %{version}-%{_rel}
-
-%description -n kernel-smp-net-%{name}
-Unicorn ADSL modem drivers for Linux SMP kernel.
-
-%description -n kernel-smp-net-%{name} -l pl.UTF-8
-Sterowniki do modemów ADSL Unicorn dla jądra Linuksa SMP.
 
 %prep
 %setup -q -n %{name}
@@ -69,76 +59,14 @@ Sterowniki do modemów ADSL Unicorn dla jądra Linuksa SMP.
 %endif
 
 %if %{with kernel}
-%{__make} -C libm
+#mv include/linux/autoconf.h include/linux/autoconf-smp.h
+cp config-dist config-smp
+%build_kernel_modules -m unicorn_{pci_atm,pci_eth,usb_atm,usb_eth} cfgs=dist
 
-cd unicorn_pci
-for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
-	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
-		exit 1
-	fi
-	install -d o/include/linux
-	ln -sf %{_kernelsrcdir}/config-$cfg o/.config
-	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg o/Module.symvers
-	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h o/include/linux/autoconf.h
-%if %{with dist_kernel}
-	%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
-%else
-	install -d o/include/config
-	touch o/include/config/MARKER
-	ln -sf %{_kernelsrcdir}/scripts o/scripts
-%endif
-	%{__make} -C %{_kernelsrcdir} clean \
-		KERNEL_SOURCES="$PWD/o" \
-		RCS_FIND_IGNORE="-name '*.ko' -o -name nv-kernel.o -o" \
-		SYSSRC=%{_kernelsrcdir} \
-		SYSOUT=$PWD/o \
-		M=$PWD O=$PWD/o \
-		%{?with_verbose:V=1}
-	%{__make} -C %{_kernelsrcdir} modules \
-		KERNEL_SOURCES="$PWD/o" \
-		CC="%{__cc}" CPP="%{__cpp}" \
-		SYSSRC=%{_kernelsrcdir} \
-		SYSOUT=$PWD/o \
-		M=$PWD O=$PWD/o \
-		%{?with_verbose:V=1}
-
-	mv unicorn_pci_atm{,-$cfg}.ko
-	mv unicorn_pci_eth{,-$cfg}.ko
-done
-
-%if %{with usb}
-cd ../unicorn_usb
-for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
-	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
-		exit 1
-	fi
-	install -d o/include/linux
-	ln -sf %{_kernelsrcdir}/config-$cfg o/.config
-	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg o/Module.symvers
-	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h o/include/linux/autoconf.h
-%if %{with dist_kernel}
-	%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
-%else
-	install -d o/include/config
-	touch o/include/config/MARKER
-	ln -sf %{_kernelsrcdir}/scripts o/scripts
-%endif
-	%{__make} -C %{_kernelsrcdir} clean \
-		RCS_FIND_IGNORE="-name '*.ko' -o -name nv-kernel.o -o" \
-		SYSSRC=%{_kernelsrcdir} \
-		SYSOUT=$PWD/o \
-		M=$PWD O=$PWD/o \
-		%{?with_verbose:V=1}
-	%{__make} -C %{_kernelsrcdir} modules \
-		CC="%{__cc}" CPP="%{__cpp}" \
-		SYSSRC=%{_kernelsrcdir} \
-		SYSOUT=$PWD/o \
-		M=$PWD O=$PWD/o \
-		%{?with_verbose:V=1}
-	mv unicorn_usb_atm{,-$cfg}.ko
-	mv unicorn_usb_eth{,-$cfg}.ko
-done
-%endif
+#	mv unicorn_pci_atm{,-$cfg}.ko
+#	mv unicorn_pci_eth{,-$cfg}.ko
+#	mv unicorn_usb_atm{,-$cfg}.ko
+#	mv unicorn_usb_eth{,-$cfg}.ko
 %endif
 
 %install
@@ -153,39 +81,17 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %if %{with kernel}
-install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
-for mods in atm eth ; do
-install unicorn_pci/unicorn_pci_$mods-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/unicorn_pci_$mods.ko
-%if %{with usb}
-install unicorn_usb/unicorn_usb_$mods-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/unicorn_usb_$mods.ko
-%endif
-%if %{with smp} && %{with dist_kernel}
-install unicorn_pci/unicorn_pci_$mods-smp.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/unicorn_pci_$mods.ko
-%if %{with usb}
-install unicorn_usb/unicorn_usb_$mods-smp.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/unicorn_usb_$mods.ko
-%endif
-%endif
-done
+%install_kernel_modules -s %{_mod_suffix} -n %{name} -m unicorn_{pci_atm,pci_eth,usb_atm,usb_eth} -d net
 %endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post -n kernel-net-%{name}
+%post -n kernel%{_alt_kernel}-net-%{name}
 %depmod %{_kernel_ver}
 
-%postun -n kernel-net-%{name}
+%postun -n kernel%{_alt_kernel}-net-%{name}
 %depmod %{_kernel_ver}
-
-%post -n kernel-smp-net-%{name}
-%depmod %{_kernel_ver}smp
-
-%postun -n kernel-smp-net-%{name}
-%depmod %{_kernel_ver}smp
 
 %if %{with userspace}
 %files -f bewan_adsl_status.lang
@@ -196,13 +102,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %if %{with kernel}
-%files -n kernel-net-%{name}
+%files -n kernel%{_alt_kernel}-net-%{name}
 %defattr(644,root,root,755)
 /lib/modules/%{_kernel_ver}/misc/*
-
-%if %{with smp} && %{with dist_kernel}
-%files -n kernel-smp-net-%{name}
-%defattr(644,root,root,755)
-/lib/modules/%{_kernel_ver}smp/misc/*
-%endif
 %endif
