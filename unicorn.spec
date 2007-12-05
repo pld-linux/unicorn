@@ -60,8 +60,7 @@ Sterowniki do modemów ADSL Unicorn dla jądra Linuksa.
 
 %if %{with kernel}
 #mv include/linux/autoconf.h include/linux/autoconf-smp.h
-cp config-dist config-smp
-%build_kernel_modules -m unicorn_{pci_atm,pci_eth,usb_atm,usb_eth} cfgs=dist
+%build_kernel_modules -m unicorn_{pci_atm,pci_eth,usb_atm,usb_eth}
 
 #	mv unicorn_pci_atm{,-$cfg}.ko
 #	mv unicorn_pci_eth{,-$cfg}.ko
