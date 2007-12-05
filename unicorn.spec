@@ -11,11 +11,11 @@
 %bcond_with	verbose		# verbose build (V=1)
 %bcond_with	usb		# build usb driver
 #
+%define	_rel	0.1
 Summary:	Unicorn ADSL modem software
 Summary(pl.UTF-8):	Oprogramowanie do modemów ADSL Unicorn
 Name:		unicorn
 Version:	0.9.3
-%define	_rel	0.1
 Release:	%{_rel}
 License:	GPL v2
 Group:		Base/Kernel
@@ -23,9 +23,9 @@ Source0:	http://www.bewan.com/bewan/drivers/A1012-A1006-A904-A888-A983-%{version
 # Source0-md5:	ff9829f03168279a079d05aea780ee99
 Patch0:		%{name}-makefile.patch
 URL:		http://www.bewan.com/
+BuildRequires:	gtk+-devel
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.22}
 BuildRequires:	rpmbuild(macros) >= 1.379
-BuildRequires:	gtk+-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -76,7 +76,7 @@ Sterowniki do modemów ADSL Unicorn dla jądra Linuksa.
 %endif
 
 %if %{with kernel}
-%build_kernel_modules -C libm -C unicorn_pci -m unicorn_{pci_atm,pci_eth} 
+%build_kernel_modules -C libm -C unicorn_pci -m unicorn_{pci_atm,pci_eth}
 %{?with_usb:%build_kernel_modules -C unicorn_usb -m unicorn_usb_atm,unicorn_usb_eth}
 %endif
 
