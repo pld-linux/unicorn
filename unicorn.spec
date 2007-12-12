@@ -35,8 +35,8 @@ Unicorn ADSL modem tools.
 Narzędzia do modemów ADSL Unicorn.
 
 %package -n kernel%{_alt_kernel}-net-%{name}-pci
-Summary:	Unicorn ADSL modem drivers for Linux kernel
-Summary(pl.UTF-8):	Sterowniki do modemów ADSL Unicorn dla jądra Linuksa
+Summary:	Unicorn ADSL PCI modem drivers for Linux kernel
+Summary(pl.UTF-8):	Sterowniki do modemów PCI ADSL Unicorn dla jądra Linuksa
 Release:	%{_rel}@%{_kernel_ver_str}
 Provides:	%{name}
 %{?with_dist_kernel:%requires_releq_kernel}
@@ -45,14 +45,14 @@ Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
 %description -n kernel%{_alt_kernel}-net-%{name}-pci
-Unicorn ADSL modem drivers for Linux kernel.
+Unicorn ADSL PCI modem drivers for Linux kernel.
 
 %description -n kernel%{_alt_kernel}-net-%{name}-pci -l pl.UTF-8
-Sterowniki do modemów ADSL Unicorn dla jądra Linuksa.
+Sterowniki do modemów PCI ADSL Unicorn dla jądra Linuksa.
 
 %package -n kernel%{_alt_kernel}-net-%{name}-usb
-Summary:	Unicorn ADSL usb modem drivers for Linux kernel
-Summary(pl.UTF-8):	Sterowniki do modemówusb  ADSL Unicorn dla jądra Linuksa
+Summary:	Unicorn ADSL USB modem drivers for Linux kernel
+Summary(pl.UTF-8):	Sterowniki do modemów USB ADSL Unicorn dla jądra Linuksa
 Release:	%{_rel}@%{_kernel_ver_str}
 Provides:	%{name}
 %{?with_dist_kernel:%requires_releq_kernel}
@@ -61,10 +61,10 @@ Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
 %description -n kernel%{_alt_kernel}-net-%{name}-usb
-Unicorn ADSL modem drivers for Linux kernel.
+Unicorn ADSL USB modem drivers for Linux kernel.
 
 %description -n kernel%{_alt_kernel}-net-%{name}-usb -l pl.UTF-8
-Sterowniki do modemów ADSL Unicorn dla jądra Linuksa.
+Sterowniki do modemów USB ADSL Unicorn dla jądra Linuksa.
 
 %prep
 %setup -q -n %{name}
@@ -121,12 +121,13 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with kernel}
 %files -n kernel%{_alt_kernel}-net-%{name}-pci
 %defattr(644,root,root,755)
-/lib/modules/%{_kernel_ver}/misc/*pci*
+/lib/modules/%{_kernel_ver}/misc/unicorn_pci_atm.ko*
+/lib/modules/%{_kernel_ver}/misc/unicorn_pci_eth.ko*
 
 %if %{with usb}
 %files -n kernel%{_alt_kernel}-net-%{name}-usb
 %defattr(644,root,root,755)
-/lib/modules/%{_kernel_ver}/misc/*usb*
-
+/lib/modules/%{_kernel_ver}/misc/unicorn_usb_atm.ko*
+/lib/modules/%{_kernel_ver}/misc/unicorn_usb_eth.ko*
 %endif
 %endif
